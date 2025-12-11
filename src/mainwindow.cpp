@@ -34,6 +34,7 @@
 #include "Tabs/Vendor/AMD/RYCPU/RYCPUTab.h"
 #include "Tabs/Vendor/AMD/CPU/CPUTab.h"
 #endif
+#include "../version.h"
 #include "Tabs/OS/Linux/SysFs/SysFsTab.h"
 #include "Tabs/OS/Linux/IntelGPU/IntelGPUTab.h"
 #include "Tabs/OS/Linux/AMDGPU/AMDGPUTab.h"
@@ -51,7 +52,7 @@ MainWindow::~MainWindow() {
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    setWindowTitle("PowerTuner");
+    setWindowTitle(QString("PowerTuner %1.%2").arg(CLIENT_VER_MAJOR).arg(CLIENT_VER_MINOR));
     setWindowIcon(QIcon(":/ico/pwt"));
 
     const QString globalDataPath = QString("%1/PowerTuner").arg(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
