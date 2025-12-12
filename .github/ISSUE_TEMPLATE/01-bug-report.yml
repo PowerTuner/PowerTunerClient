@@ -1,4 +1,5 @@
 name: "[Bug Report] PowerTuner Desktop Client"
+description: "PowerTuner Desktop Client bug"
 labels: 'bug'
 body:
   - type: markdown
