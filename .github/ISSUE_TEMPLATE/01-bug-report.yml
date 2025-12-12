@@ -38,7 +38,7 @@ body:
       value: '---'
   - type: dropdown
     attributes:
-      label: OS
+      label: Windows OS
       options:
         - Not using Windows
         - Windows 11 25H2
@@ -60,7 +60,7 @@ body:
       value: '---'
   - type: dropdown
     attributes:
-      label: OS
+      label: Linux OS
       options:
         - Not using Linux
         - Linux (Please specify)
