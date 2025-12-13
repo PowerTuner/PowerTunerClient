@@ -8,6 +8,11 @@ For a command-line client, see [PowerTunerCLI](https://github.com/PowerTuner/Pow
 
 For a gamepad first client and couch gaming, see [PowerTunerConsole](https://github.com/PowerTuner/PowerTunerConsole)
 
+## How to start
+
+Go to **Daemons** tab and connect to **local** daemon,
+or add a new daemon if you installed the daemon/service in another device and want to connect to it.
+
 ## Custom input ranges for settings
 
 Some settings like TDP or GPU clock, use a json database with min/max ranges.
