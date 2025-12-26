@@ -24,16 +24,23 @@
 
 namespace PWT::UI::INTEL {
     class HWPTab final: public AddonTab {
+        Q_OBJECT
+
     private:
         QCheckBox *enableHWP = nullptr;
         HWPRequestGBox *hwpRequestGBox = nullptr;
         QPointer<HWPRequestPkgGBox> hwpRequestPkgGBox;
         QPointer<QCheckBox> hwpPkgCtlPolarity;
+        QPointer<QCheckBox> preferOSSettng;
+        bool preferOSChecked = true;
 
     public:
         explicit HWPTab(const PWTS::DeviceInfoPacket &packet);
 
         void refreshTab(const PWTS::DaemonPacket &packet) override;
         void setDataForPacket(PWTS::ClientPacket &packet) const override;
+
+    private slots:
+        void onPreferOSStateChanged(Qt::CheckState state);
     };
 }

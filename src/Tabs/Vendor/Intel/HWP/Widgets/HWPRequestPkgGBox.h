@@ -33,6 +33,6 @@ namespace PWT::UI::INTEL {
         explicit HWPRequestPkgGBox(const QSet<PWTS::Feature> &cpuFeatures);
 
         void setData(const PWTS::DaemonPacket &packet);
-        void setDataForPacket(const PWTS::ClientPacket &packet) const;
+        void setDataForPacket(const PWTS::ClientPacket &packet, bool isIgnored) const;
     };
 }

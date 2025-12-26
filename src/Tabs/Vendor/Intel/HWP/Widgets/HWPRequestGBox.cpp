@@ -79,7 +79,7 @@ namespace PWT::UI::INTEL {
         updateHwpReqWidget(cpuSelect->currentIndex());
     }
 
-    void HWPRequestGBox::setDataForPacket(const PWTS::ClientPacket &packet) {
+    void HWPRequestGBox::setDataForPacket(const PWTS::ClientPacket &packet, const bool isIgnored) {
         if (!isEnabled())
             return;
 
@@ -103,7 +103,7 @@ namespace PWT::UI::INTEL {
 
         for (int i=0,l=data.size(); i<l; ++i) {
             if (data[i].valid)
-                packet.intelData->threadData[i].hwpRequest.setValue(data[i].request, true);
+                packet.intelData->threadData[i].hwpRequest.setValue(data[i].request, true, isIgnored);
         }
     }
 

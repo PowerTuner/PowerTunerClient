@@ -24,6 +24,17 @@ namespace PWT::UI::INTEL {
         FlowLayout *optionsLyt = new FlowLayout();
 
         enableHWP = new QCheckBox("HWP Enable");
+        hwpRequestGBox = new HWPRequestGBox(features, packet.cpuInfo.numLogicalCpus);
+
+        if (features.contains(PWTS::Feature::PWR_SCHEME_GROUP)) {
+            preferOSSettng = new QCheckBox("Prefer OS setting");
+
+            preferOSSettng->setChecked(true);
+            preferOSSettng->setToolTip("If checked, this option is ignored and the OS setting will be applied instead. (SysFs in Linux, power scheme in Windows, etc..)");
+            optionsLyt->addWidget(preferOSSettng);
+
+            QObject::connect(preferOSSettng, &QCheckBox::checkStateChanged, this, &HWPTab::onPreferOSStateChanged);
+        }
 
         optionsLyt->addWidget(enableHWP);
 
@@ -34,8 +45,6 @@ namespace PWT::UI::INTEL {
 
         scrollWidgLyt->insertLayout(nextInsertIdx(), optionsLyt);
         scrollWidgLyt->insertSpacing(nextInsertIdx(), 6);
-
-        hwpRequestGBox = new HWPRequestGBox(features, packet.cpuInfo.numLogicalCpus);
         scrollWidgLyt->insertWidget(nextInsertIdx(), hwpRequestGBox);
 
         if (features.contains(PWTS::Feature::INTEL_HWP_REQ_PKG)) {
@@ -48,7 +57,7 @@ namespace PWT::UI::INTEL {
         const int hwpEnable = packet.intelData->hwpEnable.getValue();
         const bool hwpEnableValid = packet.intelData->hwpEnable.isValid();
 
-        enableHWP->setEnabled(hwpEnableValid && hwpEnable == 0);
+        enableHWP->setEnabled(hwpEnableValid);
         enableHWP->setChecked(hwpEnableValid && hwpEnable == 1);
         hwpRequestGBox->setData(packet);
 
@@ -64,13 +73,19 @@ namespace PWT::UI::INTEL {
     }
 
     void HWPTab::setDataForPacket(PWTS::ClientPacket &packet) const {
-        packet.intelData->hwpEnable.setValue(enableHWP->isChecked(), enableHWP->isEnabled());
-        hwpRequestGBox->setDataForPacket(packet);
+        const bool isIgnored = !preferOSSettng.isNull() && preferOSSettng->isChecked();
+
+        packet.intelData->hwpEnable.setValue(enableHWP->isChecked(), enableHWP->isEnabled(), isIgnored);
+        hwpRequestGBox->setDataForPacket(packet, isIgnored);
 
         if (!hwpRequestPkgGBox.isNull())
-            hwpRequestPkgGBox->setDataForPacket(packet);
+            hwpRequestPkgGBox->setDataForPacket(packet, isIgnored);
 
         if (!hwpPkgCtlPolarity.isNull())
-            packet.intelData->hwpPkgCtlPolarity.setValue(hwpPkgCtlPolarity->isChecked(), hwpPkgCtlPolarity->isEnabled());
+            packet.intelData->hwpPkgCtlPolarity.setValue(hwpPkgCtlPolarity->isChecked(), hwpPkgCtlPolarity->isEnabled(), isIgnored);
+    }
+
+    void HWPTab::onPreferOSStateChanged(const Qt::CheckState state) {
+        preferOSChecked = state == Qt::Checked;
     }
 }
