@@ -17,16 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class VRMCurrentGBox final: public SliderLimitGBox {
+    class VRMCurrentGBox final: public RADJSliderGBox {
     public:
-        VRMCurrentGBox(): SliderLimitGBox("Thermal Design Current Limit (TDC VDD)",
+        explicit VRMCurrentGBox(const bool hasReadFeature): RADJSliderGBox("Thermal Design Current Limit (TDC VDD)",
                                             "VRM Current Limit",
                                             "Amps",
-                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                            hasReadFeature) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->vrmCurrent.isValid());
@@ -36,17 +39,20 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->vrmCurrent.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->vrmCurrent.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(packet.amdData->vrmCurrent.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->vrmCurrent.setValue(slider->getValue(), true);
+            packet.amdData->vrmCurrent.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

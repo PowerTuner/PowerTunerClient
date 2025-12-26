@@ -17,16 +17,17 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class StapmLimitGBox final: public SliderLimitGBox {
+    class StapmLimitGBox final: public RADJSliderGBox {
     public:
-        StapmLimitGBox(): SliderLimitGBox("Skin Temperature-Aware Power Management Limit (STAPM)",
+        StapmLimitGBox(): RADJSliderGBox("Skin Temperature-Aware Power Management Limit (STAPM)",
                                             "Sustained Power Limit",
                                             "Watts",
-                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                            true) {}
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->stapmLimit.isValid());
@@ -36,10 +37,7 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->stapmLimit.getValue();
-
-            if (val >= 0)
-                slider->setValue(val);
+            slider->setValue(packet.amdData->stapmLimit.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {

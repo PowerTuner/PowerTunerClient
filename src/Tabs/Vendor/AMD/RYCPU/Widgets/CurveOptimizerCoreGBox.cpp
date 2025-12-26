@@ -24,15 +24,18 @@ namespace PWT::UI::AMD {
         QHBoxLayout *cpuLyt = new QHBoxLayout();
 
         cpuSelect = new QComboBox();
+        enableChk = new QCheckBox("Enable setting");
         applyToAll = new QCheckBox("Apply to all cores");
         co = new SliderUnitWidget("", [](QLabel *unitV, const int v) { unitV->setNum(v); });
 
         for (int i=0; i<coreCount; ++i)
             cpuSelect->addItem(QString("Core %1").arg(i));
 
+        enableChk->setToolTip("If unchecked, this setting is ignored and wont be applied");
         co->setStaticLabel("Offset");
         co->setPageStep(10);
 
+        cpuLyt->addWidget(enableChk);
         cpuLyt->addWidget(applyToAll);
         cpuLyt->addStretch();
         cpuLyt->addWidget(cpuSelect);
@@ -47,6 +50,7 @@ namespace PWT::UI::AMD {
 
         QObject::connect(applyToAll, &QCheckBox::checkStateChanged, this, &CurveOptimizerCoreGBox::onApplyToAllStateChanged);
         QObject::connect(cpuSelect, &QComboBox::currentIndexChanged, this, &CurveOptimizerCoreGBox::onCpuSelectChanged);
+        QObject::connect(enableChk, &QCheckBox::checkStateChanged, this, &CurveOptimizerCoreGBox::onEnableStateChanged);
     }
 
     void CurveOptimizerCoreGBox::updateCOSlider(const int idx) const {
@@ -67,6 +71,8 @@ namespace PWT::UI::AMD {
             return;
         }
 
+        const QSignalBlocker sblock {enableChk};
+
         for (const PWTS::AMD::AMDCoreData &cdt: packet.amdData->coreData) {
             data.append({
                 .valid = cdt.curveOptimizer.isValid(),
@@ -75,12 +81,14 @@ namespace PWT::UI::AMD {
         }
 
         updateCOSlider(cpuSelect->currentIndex());
+        enableChk->setChecked(packet.hasProfileData ? !packet.amdData->coreData[0].curveOptimizer.isIgnored() : enableChecked);
     }
 
     void CurveOptimizerCoreGBox::setDataForPacket(const PWTS::ClientPacket &packet) {
         if (!isEnabled())
             return;
 
+        const bool isIgnored = !enableChk->isChecked();
         const int curve = co->getValue();
 
         if (applyToAll->isChecked()) {
@@ -94,7 +102,7 @@ namespace PWT::UI::AMD {
 
         for (int i=0,l=data.size(); i<l; ++i) {
             if (data[i].valid)
-                packet.amdData->coreData[i].curveOptimizer.setValue(data[i].co, true);
+                packet.amdData->coreData[i].curveOptimizer.setValue(data[i].co, true, isIgnored);
         }
     }
 
@@ -109,5 +117,9 @@ namespace PWT::UI::AMD {
 
     void CurveOptimizerCoreGBox::onApplyToAllStateChanged(const Qt::CheckState state) const {
         cpuSelect->setEnabled(state != Qt::Checked);
+    }
+
+    void CurveOptimizerCoreGBox::onEnableStateChanged(const Qt::CheckState state) {
+        enableChecked = state == Qt::Checked;
     }
 }

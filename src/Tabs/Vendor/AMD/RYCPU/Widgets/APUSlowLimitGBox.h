@@ -17,16 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class APUSlowLimitGBox final: public SliderLimitGBox {
+    class APUSlowLimitGBox final: public RADJSliderGBox {
     public:
-        APUSlowLimitGBox(): SliderLimitGBox("Package Power Tracking APU Slow Limit (PPT APU)",
+        explicit APUSlowLimitGBox(const bool hasReadFeature): RADJSliderGBox("Package Power Tracking APU Slow Limit (PPT APU)",
                                             "APU Slow Power Limit for A+A dGPU platform",
                                             "Watts",
-                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                            [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                            hasReadFeature) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->apuSlow.isValid());
@@ -36,17 +39,20 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->apuSlow.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->apuSlow.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(packet.amdData->apuSlow.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->apuSlow.setValue(slider->getValue(), true);
+            packet.amdData->apuSlow.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

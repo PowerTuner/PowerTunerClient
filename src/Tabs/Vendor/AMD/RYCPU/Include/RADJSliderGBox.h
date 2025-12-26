@@ -18,20 +18,23 @@
 #pragma once
 
 #include <QGroupBox>
+#include <QCheckBox>
 
 #include "../../../../Widgets/SliderUnitWidget.h"
 #include "pwtShared/Include/Packets/ClientPacket.h"
 #include "pwtShared/Include/Packets/DaemonPacket.h"
 
 namespace PWT::UI::AMD {
-    class SliderLimitGBox: public QGroupBox {
+    class RADJSliderGBox: public QGroupBox {
         Q_OBJECT
 
     protected:
         SliderUnitWidget *slider = nullptr;
+        QPointer<QCheckBox> enableChk;
+        bool enableChecked = false;
 
     public:
-        SliderLimitGBox(const QString &title, const QString &label, const QString &unit, const std::function<void(QLabel *,int)> &unitVCallback);
+        RADJSliderGBox(const QString &title, const QString &label, const QString &unit, const std::function<void(QLabel *,int)> &unitVCallback, bool hasReadFeature);
 
         void setMaximum(const int max) const { slider->setMaximum(max); }
 
@@ -42,6 +45,7 @@ namespace PWT::UI::AMD {
 
     private slots:
         void onSliderValueChanged(int v);
+        void onEnableStateChanged(Qt::CheckState state);
 
     signals:
         void sliderValueChanged(int v);

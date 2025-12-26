@@ -19,21 +19,28 @@
 
 #include <QGroupBox>
 #include <QRadioButton>
+#include <QCheckBox>
 
 #include "pwtShared/Include/Packets/ClientPacket.h"
 #include "pwtShared/Include/Packets/DaemonPacket.h"
 
 namespace PWT::UI::AMD {
     class PowerProfileGBox final: public QGroupBox {
+        Q_OBJECT
+
     private:
+        QCheckBox *enableChk = nullptr;
         QRadioButton *powerSave = nullptr;
         QRadioButton *maxPerformance = nullptr;
-        QRadioButton *dontSet = nullptr;
+        bool enableChecked = false;
 
     public:
         PowerProfileGBox();
 
         void setData(const PWTS::DaemonPacket &packet);
         void setDataForPacket(const PWTS::ClientPacket &packet) const;
+
+    private slots:
+        void onEnableStateChanged(Qt::CheckState state);
     };
 }

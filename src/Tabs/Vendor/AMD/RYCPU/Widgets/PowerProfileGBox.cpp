@@ -22,23 +22,28 @@
 
 namespace PWT::UI::AMD {
     PowerProfileGBox::PowerProfileGBox(): QGroupBox("Power Profile") {
-        QHBoxLayout *lyt = new QHBoxLayout();
+        QVBoxLayout *lyt = new QVBoxLayout();
+        QHBoxLayout *radioLyt = new QHBoxLayout();
 
-        powerSave = new QRadioButton("power saving");
-        maxPerformance = new QRadioButton("max performance");
-        dontSet = new QRadioButton("don't set");
+        enableChk = new QCheckBox("Enable setting");
+        powerSave = new QRadioButton("Power saving");
+        maxPerformance = new QRadioButton("Maximum performance");
 
         powerSave->setToolTip("Hidden option to improve power efficiency (set when AC unplugged): behavior depends on CPU, device and manufacturer");
         maxPerformance->setToolTip("Hidden option to improve performance (set when AC plugged in): behavior depends on CPU, device and manufacturer");
 
-        lyt->addWidget(powerSave);
-        lyt->addWidget(maxPerformance);
-        lyt->addWidget(dontSet);
-        lyt->addStretch();
+        radioLyt->addStretch();
+        radioLyt->addWidget(powerSave);
+        radioLyt->addWidget(maxPerformance);
+        lyt->addWidget(enableChk);
+        lyt->addSpacing(4);
+        lyt->addLayout(radioLyt);
 
         setAlignment(Qt::AlignCenter);
         setLayout(lyt);
         setEnabled(false);
+
+        QObject::connect(enableChk, &QCheckBox::checkStateChanged, this, &PowerProfileGBox::onEnableStateChanged);
     }
 
     void PowerProfileGBox::setData(const PWTS::DaemonPacket &packet) {
@@ -50,24 +55,31 @@ namespace PWT::UI::AMD {
         }
 
         const int val = packet.amdData->powerProfile.getValue();
+        const QSignalBlocker sblock {enableChk};
 
         if (val == 0)
             powerSave->setChecked(true);
         else if (val == 1)
             maxPerformance->setChecked(true);
-        else
-            dontSet->setChecked(true);
+
+        enableChk->setChecked(packet.hasProfileData ? !packet.amdData->powerProfile.isIgnored() : enableChecked);
     }
 
     void PowerProfileGBox::setDataForPacket(const PWTS::ClientPacket &packet) const {
         if (!isEnabled())
             return;
 
+        const bool isIgnored = !enableChk->isChecked();
+
         if (powerSave->isChecked())
-            packet.amdData->powerProfile.setValue(0, true);
+            packet.amdData->powerProfile.setValue(0, true, isIgnored);
         else if (maxPerformance->isChecked())
-            packet.amdData->powerProfile.setValue(1, true);
+            packet.amdData->powerProfile.setValue(1, true, isIgnored);
         else
-            packet.amdData->powerProfile.setValue(-1, true);
+            packet.amdData->powerProfile.setValue(-1, true, true);
+    }
+
+    void PowerProfileGBox::onEnableStateChanged(const Qt::CheckState state) {
+        enableChecked = state == Qt::Checked;
     }
 }

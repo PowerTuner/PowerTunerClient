@@ -17,16 +17,17 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class DGPUSkinTempGBox final: public SliderLimitGBox {
+    class DGPUSkinTempGBox final: public RADJSliderGBox {
     public:
-        DGPUSkinTempGBox(): SliderLimitGBox("Smart Temperature Tracking dGPU (STT dGPU)",
+        explicit DGPUSkinTempGBox(const bool hasReadFeature): RADJSliderGBox("Smart Temperature Tracking dGPU (STT dGPU)",
                                             "dGPU Skin Temperature Limit",
                                             "°C",
-                                            [](QLabel *unitV, const int v) { unitV->setNum(v); }) {}
+                                            [](QLabel *unitV, const int v) { unitV->setNum(v); },
+                                            hasReadFeature) {}
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->dgpuSkinTemp.isValid());
@@ -36,17 +37,20 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->dgpuSkinTemp.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->dgpuSkinTemp.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(packet.amdData->dgpuSkinTemp.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->dgpuSkinTemp.setValue(slider->getValue(), true);
+            packet.amdData->dgpuSkinTemp.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

@@ -17,16 +17,17 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class CurveOptimizerAllGBox final: public SliderLimitGBox {
+    class CurveOptimizerAllGBox final: public RADJSliderGBox {
     public:
-        CurveOptimizerAllGBox(): SliderLimitGBox("Curve Optimizer (All Cores)",
-                                        "Offset",
-                                        "",
-                                        [](QLabel *unitV, const int v) { unitV->setNum(v); }) {
+        explicit CurveOptimizerAllGBox(const bool hasReadFeature): RADJSliderGBox("Curve Optimizer (All Cores)",
+                                                "Offset",
+                                                "",
+                                                [](QLabel *unitV, const int v) { unitV->setNum(v); },
+                                                hasReadFeature) {
             slider->setPageStep(10);
         }
 
@@ -38,6 +39,12 @@ namespace PWT::UI::AMD {
                 return;
             }
 
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
+
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->curveOptimizer.isIgnored() : enableChecked);
+            }
+
             slider->setValue(packet.amdData->curveOptimizer.getValue());
         }
 
@@ -45,7 +52,7 @@ namespace PWT::UI::AMD {
             if (!isEnabled())
                 return;
 
-            packet.amdData->curveOptimizer.setValue(slider->getValue(), true);
+            packet.amdData->curveOptimizer.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

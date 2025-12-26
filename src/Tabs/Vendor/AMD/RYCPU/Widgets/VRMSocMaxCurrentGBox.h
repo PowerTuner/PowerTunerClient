@@ -17,16 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class VRMSocMaxCurrentGBox final: public SliderLimitGBox {
+    class VRMSocMaxCurrentGBox final: public RADJSliderGBox {
     public:
-        VRMSocMaxCurrentGBox(): SliderLimitGBox("Electrical Design Current Limit (EDC SoC)",
+        explicit VRMSocMaxCurrentGBox(const bool hasReadFeature): RADJSliderGBox("Electrical Design Current Limit (EDC SoC)",
                                                 "VRM SoC Maximum Current Limit",
                                                 "Amps",
-                                                [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                                [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                                hasReadFeature) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->vrmSocMaxCurrent.isValid());
@@ -36,17 +39,20 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->vrmSocMaxCurrent.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->vrmSocMaxCurrent.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(packet.amdData->vrmSocMaxCurrent.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->vrmSocMaxCurrent.setValue(slider->getValue(), true);
+            packet.amdData->vrmSocMaxCurrent.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

@@ -17,13 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderClockGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class MaxGfxClockGBox final: public SliderClockGBox {
+    class MaxGfxClockGBox final: public RADJSliderGBox {
     public:
-        MaxGfxClockGBox(): SliderClockGBox("Maximum GFX Clock", "Maximum GFX Clock") {}
+        explicit MaxGfxClockGBox(const bool hasReadFeature): RADJSliderGBox("Maximum GFX Clock",
+                                            "Maximum GFX Clock",
+                                            "MHz",
+                                            [](QLabel *unitV, const int v) { unitV->setNum(v); },
+                                            hasReadFeature) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->maxGfxClock.isValid());
@@ -35,17 +41,20 @@ namespace PWT::UI::AMD {
 
             const int val = packet.amdData->maxGfxClock.getValue();
 
-            slider->setValue(val == -1 ? slider->getMaximum() : val);
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (!dontSet.isNull())
-                dontSet->setChecked(val <= 0);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->maxGfxClock.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(val == -1 ? slider->getMaximum() : val);
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->maxGfxClock.setValue(getValue(), true);
+            packet.amdData->maxGfxClock.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

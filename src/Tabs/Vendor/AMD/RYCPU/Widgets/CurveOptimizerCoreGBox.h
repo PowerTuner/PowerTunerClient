@@ -36,9 +36,11 @@ namespace PWT::UI::AMD {
         };
 
         QComboBox *cpuSelect = nullptr;
+        QCheckBox *enableChk = nullptr;
         QCheckBox *applyToAll = nullptr;
         SliderUnitWidget *co = nullptr;
         QList<WData> data;
+        bool enableChecked = false;
         int prevCPU = 0;
 
         void updateCOSlider(int idx) const;
@@ -53,5 +55,6 @@ namespace PWT::UI::AMD {
     private slots:
         void onCpuSelectChanged(int idx);
         void onApplyToAllStateChanged(Qt::CheckState state) const;
+        void onEnableStateChanged(Qt::CheckState state);
     };
 }

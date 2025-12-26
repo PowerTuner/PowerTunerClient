@@ -17,16 +17,17 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class TctlTempGBox final: public SliderLimitGBox {
+    class TctlTempGBox final: public RADJSliderGBox {
     public:
-        TctlTempGBox(): SliderLimitGBox("T Control Temperature (TCTL)",
+        explicit TctlTempGBox(const bool hasReadFeature): RADJSliderGBox("T Control Temperature (TCTL)",
                                         "Thermal Limit Core",
                                         "°C",
-                                        [](QLabel *unitV, const int v) { unitV->setNum(v); }) {}
+                                        [](QLabel *unitV, const int v) { unitV->setNum(v); },
+                                        hasReadFeature) {}
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->tctlTemp.isValid());
@@ -36,17 +37,18 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->tctlTemp.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->tctlTemp.isIgnored() : enableChecked);
+            }
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->tctlTemp.setValue(slider->getValue(), true);
+            packet.amdData->tctlTemp.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

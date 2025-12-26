@@ -15,16 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "SliderLimitGBox.h"
+#include "RADJSliderGBox.h"
 
 namespace PWT::UI::AMD {
-    SliderLimitGBox::SliderLimitGBox(const QString &title, const QString &label, const QString &unit, const std::function<void(QLabel *,int)> &unitVCallback): QGroupBox(title) {
+    RADJSliderGBox::RADJSliderGBox(const QString &title, const QString &label, const QString &unit, const std::function<void(QLabel *,int)> &unitVCallback, const bool hasReadFeature): QGroupBox(title) {
         QVBoxLayout *lyt = new QVBoxLayout();
 
         slider = new SliderUnitWidget(unit, unitVCallback);
 
         slider->setStaticLabel(label);
-        slider->setPageStep(100);
+
+        if (!hasReadFeature) { // cannot read its value from table, make this an optional setting
+            enableChk = new QCheckBox("Enable setting");
+
+            enableChk->setToolTip("If unchecked, this setting is ignored and wont be applied");
+            lyt->addWidget(enableChk);
+            lyt->addSpacing(4);
+
+            QObject::connect(enableChk, &QCheckBox::checkStateChanged, this, &RADJSliderGBox::onEnableStateChanged);
+        }
 
         lyt->addWidget(slider);
 
@@ -32,16 +41,20 @@ namespace PWT::UI::AMD {
         setLayout(lyt);
         setEnabled(false);
 
-        QObject::connect(slider, &SliderUnitWidget::valueChanged, this, &SliderLimitGBox::onSliderValueChanged);
+        QObject::connect(slider, &SliderUnitWidget::valueChanged, this, &RADJSliderGBox::onSliderValueChanged);
     }
 
-    void SliderLimitGBox::setRange(const PWTS::MinMax &range) const {
+    void RADJSliderGBox::setRange(const PWTS::MinMax &range) const {
         const QSignalBlocker sblock {slider};
 
         slider->setRange(range.min, range.max);
     }
 
-    void SliderLimitGBox::onSliderValueChanged(const int v) {
+    void RADJSliderGBox::onSliderValueChanged(const int v) {
         emit sliderValueChanged(v);
+    }
+
+    void RADJSliderGBox::onEnableStateChanged(const Qt::CheckState state) {
+        enableChecked = state == Qt::Checked;
     }
 }

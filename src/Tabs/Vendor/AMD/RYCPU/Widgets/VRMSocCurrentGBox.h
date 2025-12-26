@@ -17,16 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class VRMSocCurrentGBox final: public SliderLimitGBox {
+    class VRMSocCurrentGBox final: public RADJSliderGBox {
     public:
-        VRMSocCurrentGBox(): SliderLimitGBox("Thermal Design Current Limit (TDC SoC)",
+        explicit VRMSocCurrentGBox(const bool hasReadFeature): RADJSliderGBox("Thermal Design Current Limit (TDC SoC)",
                                                 "VRM SoC Current Limit",
                                                 "Amps",
-                                                [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                                [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                                hasReadFeature) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->vrmSocCurrent.isValid());
@@ -36,17 +39,20 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->vrmSocCurrent.getValue();
+            if (!enableChk.isNull()) {
+                const QSignalBlocker sblock {enableChk};
 
-            if (val >= 0)
-                slider->setValue(val);
+                enableChk->setChecked(packet.hasProfileData ? !packet.amdData->vrmSocCurrent.isIgnored() : enableChecked);
+            }
+
+            slider->setValue(packet.amdData->vrmSocCurrent.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
             if (!isEnabled())
                 return;
 
-            packet.amdData->vrmSocCurrent.setValue(slider->getValue(), true);
+            packet.amdData->vrmSocCurrent.setValue(slider->getValue(), true, !enableChk.isNull() && !enableChk->isChecked());
         }
     };
 }

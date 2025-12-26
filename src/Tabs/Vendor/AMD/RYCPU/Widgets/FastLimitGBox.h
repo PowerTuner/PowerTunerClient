@@ -17,16 +17,19 @@
  */
 #pragma once
 
-#include "../Include/SliderLimitGBox.h"
+#include "../Include/RADJSliderGBox.h"
 #include "pwtClientCommon/UILogger.h"
 
 namespace PWT::UI::AMD {
-    class FastLimitGBox final: public SliderLimitGBox {
+    class FastLimitGBox final: public RADJSliderGBox {
     public:
-        FastLimitGBox(): SliderLimitGBox("Package Power Tracking Fast Limit (PPT Fast)",
+        FastLimitGBox(): RADJSliderGBox("Package Power Tracking Fast Limit (PPT Fast)",
                                         "Actual Power Limit",
                                         "Watts",
-                                        [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); }) {}
+                                        [](QLabel *unitV, const int v) { unitV->setNum(static_cast<float>(v) / 1000); },
+                                        true) {
+            slider->setPageStep(100);
+        }
 
         void setData(const PWTS::DaemonPacket &packet) override {
             setEnabled(packet.amdData->fastLimit.isValid());
@@ -36,10 +39,7 @@ namespace PWT::UI::AMD {
                 return;
             }
 
-            const int val = packet.amdData->fastLimit.getValue();
-
-            if (val >= 0)
-                slider->setValue(val);
+            slider->setValue(packet.amdData->fastLimit.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {

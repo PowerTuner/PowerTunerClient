@@ -22,89 +22,89 @@ namespace PWT::UI::AMD {
     RYCPUTab::RYCPUTab(const PWTS::DeviceInfoPacket &packet) {
         const QSet<PWTS::Feature> &features = packet.features.cpu;
 
-        if (features.contains(PWTS::Feature::AMD_RY_FAST_LIMIT)) {
+        if (features.contains(PWTS::Feature::AMD_RY_FAST_LIMIT_W)) {
             fastLimitGBox = new FastLimitGBox();
             scrollWidgLyt->insertWidget(nextInsertIdx(), fastLimitGBox);
             QObject::connect(fastLimitGBox, &FastLimitGBox::sliderValueChanged, this, &RYCPUTab::onFastLimitChanged);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_SLOW_LIMIT)) {
+        if (features.contains(PWTS::Feature::AMD_RY_SLOW_LIMIT_W)) {
             slowLimitGBox = new SlowLimitGBox();
             scrollWidgLyt->insertWidget(nextInsertIdx(), slowLimitGBox);
             QObject::connect(slowLimitGBox, &SlowLimitGBox::sliderValueChanged, this, &RYCPUTab::onSlowLimitChanged);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_STAPM_LIMIT)) {
+        if (features.contains(PWTS::Feature::AMD_RY_STAPM_LIMIT_W)) {
             stapmLimitGBox = new StapmLimitGBox();
             scrollWidgLyt->insertWidget(nextInsertIdx(), stapmLimitGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_APU_SLOW)) {
-            apuSlowLimitGBox = new APUSlowLimitGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_APU_SLOW_W)) {
+            apuSlowLimitGBox = new APUSlowLimitGBox(features.contains(PWTS::Feature::AMD_RY_APU_SLOW_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), apuSlowLimitGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_TCTL_TEMP)) {
-            tctlTempGBox = new TctlTempGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_TCTL_TEMP_W)) {
+            tctlTempGBox = new TctlTempGBox(features.contains(PWTS::Feature::AMD_RY_TCTL_TEMP_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), tctlTempGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_APU_SKIN_TEMP)) {
-            apuSkinTempGBox = new APUSkinTempGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_APU_SKIN_TEMP_W)) {
+            apuSkinTempGBox = new APUSkinTempGBox(features.contains(PWTS::Feature::AMD_RY_APU_SKIN_TEMP_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), apuSkinTempGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_DGPU_SKIN_TEMP)) {
-            dgpuSkinTempGBox = new DGPUSkinTempGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_DGPU_SKIN_TEMP_W)) {
+            dgpuSkinTempGBox = new DGPUSkinTempGBox(features.contains(PWTS::Feature::AMD_RY_DGPU_SKIN_TEMP_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), dgpuSkinTempGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_VRM_CURRENT)) {
-            vrmCurrentGBox = new VRMCurrentGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_VRM_CURRENT_W)) {
+            vrmCurrentGBox = new VRMCurrentGBox(features.contains(PWTS::Feature::AMD_RY_VRM_CURRENT_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), vrmCurrentGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_VRM_SOC_CURRENT)) {
-            vrmSocCurrentGBox = new VRMSocCurrentGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_VRM_SOC_CURRENT_W)) {
+            vrmSocCurrentGBox = new VRMSocCurrentGBox(features.contains(PWTS::Feature::AMD_RY_VRM_SOC_CURRENT_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), vrmSocCurrentGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_VRM_MAX_CURRENT)) {
-            vrmMaxCurrentGBox = new VRMMaxCurrentGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_VRM_MAX_CURRENT_W)) {
+            vrmMaxCurrentGBox = new VRMMaxCurrentGBox(features.contains(PWTS::Feature::AMD_RY_VRM_MAX_CURRENT_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), vrmMaxCurrentGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_VRM_SOC_MAX_CURRENT)) {
-            vrmSocMaxCurrentGBox = new VRMSocMaxCurrentGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_VRM_SOC_MAX_CURRENT_W)) {
+            vrmSocMaxCurrentGBox = new VRMSocMaxCurrentGBox(features.contains(PWTS::Feature::AMD_RY_VRM_SOC_MAX_CURRENT_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), vrmSocMaxCurrentGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_CO_ALL)) {
-            curveOptimizerAllGBox = new CurveOptimizerAllGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_CO_ALL_W)) {
+            curveOptimizerAllGBox = new CurveOptimizerAllGBox(false);
             scrollWidgLyt->insertWidget(nextInsertIdx(), curveOptimizerAllGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_CO_PER)) {
+        if (features.contains(PWTS::Feature::AMD_RY_CO_PER_W)) {
             curveOptimizerCoreGBox = new CurveOptimizerCoreGBox(packet.cpuInfo.numCores);
             scrollWidgLyt->insertWidget(nextInsertIdx(), curveOptimizerCoreGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_STATIC_GFX_CLK)) {
-            staticGfxClkGBox = new StaticGfxClkGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_STATIC_GFX_CLK_W)) {
+            staticGfxClkGBox = new StaticGfxClkGBox(features.contains(PWTS::Feature::AMD_RY_STATIC_GFX_CLK_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), staticGfxClkGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_MIN_GFX_CLOCK)) {
-            minGfxClockGBox = new MinGfxClockGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_MIN_GFX_CLOCK_W)) {
+            minGfxClockGBox = new MinGfxClockGBox(features.contains(PWTS::Feature::AMD_RY_MIN_GFX_CLOCK_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), minGfxClockGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_MAX_GFX_CLOCK)) {
-            maxGfxClockGBox = new MaxGfxClockGBox();
+        if (features.contains(PWTS::Feature::AMD_RY_MAX_GFX_CLOCK_W)) {
+            maxGfxClockGBox = new MaxGfxClockGBox(features.contains(PWTS::Feature::AMD_RY_MAX_GFX_CLOCK_R));
             scrollWidgLyt->insertWidget(nextInsertIdx(), maxGfxClockGBox);
         }
 
-        if (features.contains(PWTS::Feature::AMD_RY_POWER_PROFILE)) {
+        if (features.contains(PWTS::Feature::AMD_RY_POWER_PROFILE_W)) {
             powerProfileGBox = new PowerProfileGBox();
             scrollWidgLyt->insertWidget(nextInsertIdx(), powerProfileGBox);
         }

@@ -240,10 +240,8 @@ if (WITH_AMD)
 		src/Tabs/OS/Linux/SysFs/Widgets/AMD/EPPWidget.h
 		src/Tabs/OS/Linux/SysFs/Widgets/AMD/EPPWidget.cpp
 
-		src/Tabs/Vendor/AMD/RYCPU/Include/SliderLimitGBox.h
-		src/Tabs/Vendor/AMD/RYCPU/Include/SliderLimitGBox.cpp
-		src/Tabs/Vendor/AMD/RYCPU/Include/SliderClockGBox.h
-		src/Tabs/Vendor/AMD/RYCPU/Include/SliderClockGBox.cpp
+		src/Tabs/Vendor/AMD/RYCPU/Include/RADJSliderGBox.h
+		src/Tabs/Vendor/AMD/RYCPU/Include/RADJSliderGBox.cpp
 		src/Tabs/Vendor/AMD/RYCPU/RYCPUTab.h
 		src/Tabs/Vendor/AMD/RYCPU/RYCPUTab.cpp
 		src/Tabs/Vendor/AMD/RYCPU/Widgets/StapmLimitGBox.h
