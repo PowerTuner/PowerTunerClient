@@ -41,8 +41,9 @@ namespace PWT::UI::AMD {
         QComboBox *cpuSelect = nullptr;
         QCheckBox *applyToAll = nullptr;
         CPPCWidget *cppcWidget = nullptr;
-        QPointer<QCheckBox> preferOSOpt;
+        QPointer<QCheckBox> preferOSSettng;
         int prevCpuSelect = 0;
+        bool preferOSChecked = true;
         QList<WData> data;
 
         void updateCPPCWidget(int idx) const;
@@ -56,5 +57,6 @@ namespace PWT::UI::AMD {
     private slots:
         void onApplyToAllChanged(Qt::CheckState state) const;
         void onCpuSelectChanged(int idx);
+        void onPreferOSStateChanged(Qt::CheckState state);
     };
 }
