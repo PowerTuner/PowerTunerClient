@@ -42,6 +42,8 @@ namespace PWT::UI::AMD {
 
                 enableChk->setChecked(packet.hasProfileData ? !packet.amdData->tctlTemp.isIgnored() : enableChecked);
             }
+
+            slider->setValue(packet.amdData->tctlTemp.getValue());
         }
 
         void setDataForPacket(const PWTS::ClientPacket &packet) const override {
