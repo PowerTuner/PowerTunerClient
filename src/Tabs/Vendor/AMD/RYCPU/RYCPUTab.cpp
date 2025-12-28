@@ -90,7 +90,7 @@ namespace PWT::UI::AMD {
         }
 
         if (features.contains(PWTS::Feature::AMD_RY_STATIC_GFX_CLK_W)) {
-            staticGfxClkGBox = new StaticGfxClkGBox(features.contains(PWTS::Feature::AMD_RY_STATIC_GFX_CLK_R));
+            staticGfxClkGBox = new StaticGfxClkGBox();
             scrollWidgLyt->insertWidget(nextInsertIdx(), staticGfxClkGBox);
         }
 

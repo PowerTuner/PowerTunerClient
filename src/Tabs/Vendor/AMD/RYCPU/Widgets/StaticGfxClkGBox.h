@@ -23,11 +23,11 @@
 namespace PWT::UI::AMD {
     class StaticGfxClkGBox final: public RADJSliderGBox {
     public:
-        explicit StaticGfxClkGBox(const bool hasReadFeature): RADJSliderGBox("Force static GPU clock",
+        StaticGfxClkGBox(): RADJSliderGBox("Force static GPU clock",
                                             "Forced Clock Speed",
                                             "MHz",
                                             [](QLabel *unitV, const int v) { unitV->setNum(v); },
-                                            hasReadFeature) {
+                                            false) {
             slider->setPageStep(100);
         }
 
