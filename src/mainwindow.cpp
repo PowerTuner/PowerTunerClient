@@ -48,6 +48,8 @@ MainWindow::~MainWindow() {
         delete trayIcon;
 
     delete ui;
+    delete profileActions;
+    delete uiActions;
 }
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
